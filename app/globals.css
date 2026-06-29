@@ -124,67 +124,60 @@ main {
 }
 
 /* ---- Scroll-reveal animations ---- */
-/* Elements start invisible; JS adds .in-view to trigger the animation */
-.reveal {
-  opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.reveal.in-view {
-  opacity: 1;
-  transform: translateY(0);
-}
-/* Stagger delays for child cards */
-.reveal-delay-1 { transition-delay: 0.08s; }
-.reveal-delay-2 { transition-delay: 0.16s; }
-.reveal-delay-3 { transition-delay: 0.24s; }
-.reveal-delay-4 { transition-delay: 0.32s; }
-.reveal-delay-5 { transition-delay: 0.40s; }
-.reveal-delay-6 { transition-delay: 0.48s; }
+/*
+ * Strategy: `.in-view` is added by RevealSection (IntersectionObserver).
+ * Elements without `.in-view` are fully visible (no hidden state on base class),
+ * so content is always readable even before JS runs.
+ * When `.in-view` is added, the element plays a one-shot CSS animation.
+ */
 
-/* Slide from left */
-.reveal-left {
-  opacity: 0;
-  transform: translateX(-32px);
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+@keyframes revealUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-.reveal-left.in-view {
-  opacity: 1;
-  transform: translateX(0);
+@keyframes revealLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealScale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
-/* Slide from right */
-.reveal-right {
-  opacity: 0;
-  transform: translateX(32px);
-  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.reveal-right.in-view {
-  opacity: 1;
-  transform: translateX(0);
-}
+/* In-view: play animation once */
+.reveal.in-view        { animation: revealUp    0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.reveal-left.in-view   { animation: revealLeft  0.6s  cubic-bezier(0.22, 1, 0.36, 1) both; }
+.reveal-right.in-view  { animation: revealRight 0.6s  cubic-bezier(0.22, 1, 0.36, 1) both; }
+.reveal-scale.in-view  { animation: revealScale 0.5s  cubic-bezier(0.22, 1, 0.36, 1) both; }
 
-/* Scale in */
-.reveal-scale {
-  opacity: 0;
-  transform: scale(0.94);
-  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-              transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.reveal-scale.in-view {
-  opacity: 1;
-  transform: scale(1);
-}
+/* Stagger delays */
+.reveal-delay-1.in-view,
+.reveal-left.reveal-delay-1.in-view,
+.reveal-right.reveal-delay-1.in-view  { animation-delay: 0.08s; }
+.reveal-delay-2.in-view,
+.reveal-left.reveal-delay-2.in-view,
+.reveal-right.reveal-delay-2.in-view  { animation-delay: 0.16s; }
+.reveal-delay-3.in-view,
+.reveal-left.reveal-delay-3.in-view,
+.reveal-right.reveal-delay-3.in-view  { animation-delay: 0.24s; }
+.reveal-delay-4.in-view,
+.reveal-left.reveal-delay-4.in-view,
+.reveal-right.reveal-delay-4.in-view  { animation-delay: 0.32s; }
+.reveal-delay-5.in-view,
+.reveal-left.reveal-delay-5.in-view,
+.reveal-right.reveal-delay-5.in-view  { animation-delay: 0.40s; }
+.reveal-delay-6.in-view,
+.reveal-left.reveal-delay-6.in-view,
+.reveal-right.reveal-delay-6.in-view  { animation-delay: 0.48s; }
 
 /* Respect reduced-motion preference */
 @media (prefers-reduced-motion: reduce) {
   .reveal, .reveal-left, .reveal-right, .reveal-scale {
-    opacity: 1;
-    transform: none;
-    transition: none;
+    animation: none !important;
   }
 }
 

@@ -44,6 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${plusJakarta.variable} bg-background`}>
       <body className="font-sans antialiased">
+
         {children}
         <BackToTop />
         {process.env.NODE_ENV === 'production' && <Analytics />}
