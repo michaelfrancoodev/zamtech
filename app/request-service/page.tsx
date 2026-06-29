@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { CheckCircle, ArrowRight, Loader2 } from 'lucide-react'
+import { CheckCircle, ArrowRight, Loader2, Copy, ExternalLink } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
@@ -28,6 +28,8 @@ const inputClass =
 
 export default function RequestServicePage() {
   const [submitted, setSubmitted] = useState(false)
+  const [trackingToken, setTrackingToken] = useState('')
+  const [copied, setCopied] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
   const [form, setForm] = useState({
@@ -46,7 +48,7 @@ export default function RequestServicePage() {
     setError('')
     startTransition(async () => {
       try {
-        await submitServiceRequest({
+        const { trackingToken: token } = await submitServiceRequest({
           fullName: form.name,
           email: form.email,
           phone: form.phone,
@@ -56,6 +58,7 @@ export default function RequestServicePage() {
           timeline: form.timeline || undefined,
           description: form.description,
         })
+        setTrackingToken(token)
         setSubmitted(true)
       } catch {
         setError('Something went wrong. Please try again or contact us directly.')
@@ -63,41 +66,70 @@ export default function RequestServicePage() {
     })
   }
 
+  const trackingUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/track/${trackingToken}`
+    : `/track/${trackingToken}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(trackingUrl).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    })
+  }
+
   if (submitted) {
     return (
       <PageWrapper>
-        <section className="min-h-[80vh] flex items-center justify-center bg-background px-4">
-          <div className="text-center max-w-lg">
-            <div className="w-20 h-20 bg-[#00C8FF]/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-10 h-10 text-[#00C8FF]" />
+        <section className="min-h-[80vh] flex items-center justify-center bg-background px-4 py-16">
+          <div className="max-w-lg w-full">
+            {/* Success header */}
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <CheckCircle className="w-8 h-8 text-emerald-400" />
+              </div>
+              <h1 className="text-2xl font-extrabold text-foreground mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
+                Request Received!
+              </h1>
+              <p className="text-muted-foreground text-sm leading-relaxed">
+                Thank you, <strong>{form.name}</strong>. We will review your request and contact you within <strong>24 hours</strong>.
+              </p>
             </div>
-            <h1
-              className="text-3xl font-extrabold text-foreground mb-4"
-              style={{ fontFamily: 'var(--font-heading)' }}
-            >
-              Request Received!
-            </h1>
-            <p className="text-muted-foreground leading-relaxed mb-2">
-              Thank you, <strong>{form.name}</strong>. We have received your service request and will get back to you within <strong>24 hours</strong>.
-            </p>
-            <p className="text-muted-foreground text-sm mb-8">
-              A copy has been sent to{' '}
-              <span className="text-[#00C8FF] font-medium">francoomichaeldev@gmail.com</span>.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <Link
-                href="/"
-                className="bg-[#0A1628] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#0a1628]/90 transition-colors"
-              >
+
+            {/* Tracking card */}
+            <div className="bg-[#0A1628] rounded-2xl p-6 mb-4 border border-[#00C8FF]/15">
+              <p className="text-[#00C8FF] text-xs font-bold uppercase tracking-wider mb-1">Your Tracking Link</p>
+              <p className="text-white/40 text-xs mb-4 leading-relaxed">
+                Bookmark this link to check your request status anytime — no account needed. We also sent it to <span className="text-white/60">{form.email}</span>.
+              </p>
+              <div className="bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-2 mb-3">
+                <p className="text-white/70 text-xs font-mono flex-1 truncate">{trackingUrl}</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleCopy}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/60 text-sm font-semibold hover:bg-white/5 hover:text-white transition-all"
+                >
+                  <Copy size={13} />
+                  {copied ? 'Copied!' : 'Copy Link'}
+                </button>
+                <Link
+                  href={`/track/${trackingToken}`}
+                  className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#00C8FF] text-[#001a24] text-sm font-bold hover:bg-[#00b8eb] transition-colors"
+                >
+                  <ExternalLink size={13} />
+                  Track Request
+                </Link>
+              </div>
+            </div>
+
+            {/* Secondary actions */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Link href="/" className="flex-1 text-center py-3 rounded-xl border border-border text-foreground text-sm font-semibold hover:bg-muted transition-colors">
                 Back to Home
               </Link>
-              <a
-                href={WA}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-[#25D366] text-white font-semibold px-6 py-3 rounded-xl hover:bg-[#22c55e] transition-colors"
-              >
-                <WhatsAppIcon size={15} className="text-white" />
+              <a href={WA} target="_blank" rel="noopener noreferrer"
+                className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-[#25D366]/10 border border-[#25D366]/20 text-[#25D366] text-sm font-semibold hover:bg-[#25D366]/15 transition-colors">
+                <WhatsAppIcon size={14} className="text-[#25D366]" />
                 WhatsApp Us
               </a>
             </div>

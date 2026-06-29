@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import {
   Search, Globe, Smartphone, Settings, Database, Users, BarChart3,
-  ChevronRight, ArrowRight, Phone, CheckCircle, Loader2,
+  ChevronRight, ArrowRight, Phone, CheckCircle, Loader2, Copy, ExternalLink,
 } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
@@ -64,6 +64,8 @@ const inputClass =
 export default function SupportPage() {
   const [query, setQuery] = useState('')
   const [ticketSubmitted, setTicketSubmitted] = useState(false)
+  const [ticketToken, setTicketToken] = useState('')
+  const [ticketCopied, setTicketCopied] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [ticketError, setTicketError] = useState('')
   const [ticket, setTicket] = useState({ name: '', email: '', category: '', description: '' })
@@ -73,7 +75,7 @@ export default function SupportPage() {
     setTicketError('')
     startTransition(async () => {
       try {
-        await submitSupportTicket({
+        const { trackingToken: token } = await submitSupportTicket({
           fullName: ticket.name,
           email: ticket.email,
           issueCategory: ticket.category,
@@ -81,6 +83,7 @@ export default function SupportPage() {
           subject: ticket.category,
           description: ticket.description,
         })
+        setTicketToken(token)
         setTicketSubmitted(true)
       } catch {
         setTicketError('Something went wrong. Please try again or call us directly.')
@@ -225,15 +228,50 @@ export default function SupportPage() {
           </div>
 
           {ticketSubmitted ? (
-            <div className="bg-white border border-border rounded-2xl p-8 text-center shadow-sm">
-              <CheckCircle className="w-12 h-12 text-[#00C8FF] mx-auto mb-4" />
-              <h3 className="text-foreground font-bold text-lg mb-2" style={{ fontFamily: 'var(--font-heading)' }}>
-                Ticket Submitted!
-              </h3>
-              <p className="text-muted-foreground text-sm">
-                We have received your support request and will respond to{' '}
-                <strong>{ticket.email}</strong> within 4–8 business hours.
-              </p>
+            <div className="space-y-4">
+              <div className="bg-white border border-border rounded-2xl p-6 text-center shadow-sm">
+                <div className="w-12 h-12 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="w-6 h-6 text-emerald-500" />
+                </div>
+                <h3 className="text-foreground font-bold text-lg mb-1" style={{ fontFamily: 'var(--font-heading)' }}>
+                  Ticket Submitted!
+                </h3>
+                <p className="text-muted-foreground text-sm">
+                  We will respond to <strong>{ticket.email}</strong> within 4–8 business hours.
+                </p>
+              </div>
+              {/* Tracking card */}
+              <div className="bg-[#0A1628] rounded-2xl p-5 border border-[#00C8FF]/15">
+                <p className="text-[#00C8FF] text-xs font-bold uppercase tracking-wider mb-1">Your Tracking Link</p>
+                <p className="text-white/35 text-xs mb-3">Track your ticket status anytime — no account needed.</p>
+                <div className="bg-white/5 border border-white/10 rounded-xl p-3 mb-3">
+                  <p className="text-white/60 text-xs font-mono truncate">
+                    {typeof window !== 'undefined' ? `${window.location.origin}/track/${ticketToken}` : `/track/${ticketToken}`}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const url = `${window.location.origin}/track/${ticketToken}`
+                      navigator.clipboard.writeText(url).then(() => {
+                        setTicketCopied(true)
+                        setTimeout(() => setTicketCopied(false), 2500)
+                      })
+                    }}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-white/10 text-white/50 text-sm font-semibold hover:bg-white/5 hover:text-white transition-all"
+                  >
+                    <Copy size={12} />
+                    {ticketCopied ? 'Copied!' : 'Copy'}
+                  </button>
+                  <Link
+                    href={`/track/${ticketToken}`}
+                    className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[#00C8FF] text-[#001a24] text-sm font-bold hover:bg-[#00b8eb] transition-colors"
+                  >
+                    <ExternalLink size={12} />
+                    Track Ticket
+                  </Link>
+                </div>
+              </div>
             </div>
           ) : (
             <form onSubmit={handleTicket} className="bg-white border border-border rounded-2xl p-6 md:p-8 space-y-5 shadow-sm">

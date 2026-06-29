@@ -1,15 +1,17 @@
 'use server'
 
-import { db } from '@/lib/db'
+import { db, ensureMigrations } from '@/lib/db'
 import { serviceRequests, contactMessages, supportTickets } from '@/lib/db/schema'
 import { auth } from '@/lib/auth'
 import { eq, desc, sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
+import { randomUUID } from 'crypto'
 import {
   sendContactEmail,
   sendServiceRequestEmail,
   sendSupportTicketEmail,
+  sendTrackingEmail,
 } from '@/lib/email'
 
 // ─── Public Actions (no auth required — website visitors) ───────────────────
@@ -23,8 +25,11 @@ export async function submitServiceRequest(data: {
   budgetRange?: string
   timeline?: string
   description: string
-}) {
+}): Promise<{ trackingToken: string }> {
+  await ensureMigrations()
+  const trackingToken = randomUUID()
   await db.insert(serviceRequests).values({
+    trackingToken,
     fullName: data.fullName,
     email: data.email,
     phone: data.phone,
@@ -35,9 +40,16 @@ export async function submitServiceRequest(data: {
     description: data.description,
     status: 'new',
   })
-  // Forward to owner email (non-blocking, no throw on failure)
   sendServiceRequestEmail(data).catch(() => {})
+  sendTrackingEmail({
+    to: data.email,
+    name: data.fullName,
+    token: trackingToken,
+    type: 'service',
+    subject: data.serviceType,
+  }).catch(() => {})
   revalidatePath('/admin')
+  return { trackingToken }
 }
 
 export async function submitContactMessage(data: {
@@ -67,8 +79,11 @@ export async function submitSupportTicket(data: {
   priority: string
   subject: string
   description: string
-}) {
+}): Promise<{ trackingToken: string }> {
+  await ensureMigrations()
+  const trackingToken = randomUUID()
   await db.insert(supportTickets).values({
+    trackingToken,
     fullName: data.fullName,
     email: data.email,
     phone: data.phone ?? null,
@@ -79,7 +94,15 @@ export async function submitSupportTicket(data: {
     status: 'open',
   })
   sendSupportTicketEmail(data).catch(() => {})
+  sendTrackingEmail({
+    to: data.email,
+    name: data.fullName,
+    token: trackingToken,
+    type: 'ticket',
+    subject: data.subject,
+  }).catch(() => {})
   revalidatePath('/admin')
+  return { trackingToken }
 }
 
 // ─── Admin guard (for mutating actions only) ─────────────────────────────────
@@ -177,4 +200,102 @@ export async function deleteSupportTicket(id: number) {
   await requireAdmin()
   await db.delete(supportTickets).where(eq(supportTickets.id, id))
   revalidatePath('/admin')
+}
+
+// ─── Public: Tracking page (no auth) ─────────────────────────────────────────
+
+export type TrackingResult =
+  | { found: false }
+  | {
+      found: true
+      type: 'service'
+      data: {
+        fullName: string
+        email: string
+        serviceType: string
+        description: string
+        status: string
+        adminNotes: string | null
+        createdAt: Date
+        updatedAt: Date
+      }
+    }
+  | {
+      found: true
+      type: 'ticket'
+      data: {
+        fullName: string
+        email: string
+        subject: string
+        issueCategory: string
+        priority: string
+        description: string
+        status: string
+        adminResponse: string | null
+        createdAt: Date
+        updatedAt: Date
+      }
+    }
+
+export async function getRequestByToken(token: string): Promise<TrackingResult> {
+  if (!token || token.length < 10) return { found: false }
+
+  // Ensure columns exist first, then query
+  await ensureMigrations()
+
+  try {
+    const { pool: pgPool } = await import('@/lib/db')
+
+    const srRes = await pgPool.query(
+      `SELECT full_name, email, service_type, description, status, admin_notes, "createdAt", "updatedAt"
+       FROM service_requests WHERE tracking_token = $1 LIMIT 1`,
+      [token]
+    )
+    if (srRes.rows.length > 0) {
+      const r = srRes.rows[0]
+      return {
+        found: true,
+        type: 'service',
+        data: {
+          fullName:    r.full_name,
+          email:       r.email,
+          serviceType: r.service_type,
+          description: r.description,
+          status:      r.status,
+          adminNotes:  r.admin_notes ?? null,
+          createdAt:   new Date(r.createdAt),
+          updatedAt:   new Date(r.updatedAt),
+        },
+      }
+    }
+
+    const stRes = await pgPool.query(
+      `SELECT full_name, email, subject, issue_category, priority, description, status, admin_response, "createdAt", "updatedAt"
+       FROM support_tickets WHERE tracking_token = $1 LIMIT 1`,
+      [token]
+    )
+    if (stRes.rows.length > 0) {
+      const r = stRes.rows[0]
+      return {
+        found: true,
+        type: 'ticket',
+        data: {
+          fullName:      r.full_name,
+          email:         r.email,
+          subject:       r.subject,
+          issueCategory: r.issue_category,
+          priority:      r.priority,
+          description:   r.description,
+          status:        r.status,
+          adminResponse: r.admin_response ?? null,
+          createdAt:     new Date(r.createdAt),
+          updatedAt:     new Date(r.updatedAt),
+        },
+      }
+    }
+  } catch {
+    return { found: false }
+  }
+
+  return { found: false }
 }
