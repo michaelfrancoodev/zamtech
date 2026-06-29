@@ -38,21 +38,11 @@ const NAV_LINKS = [
 ]
 
 export default function Navbar() {
-  const [scrolled,      setScrolled]      = useState(false)
   const [mobileOpen,    setMobileOpen]    = useState(false)
   const [openDropdown,  setOpenDropdown]  = useState<string | null>(null)
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null)
   const pathname = usePathname()
   const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-
-  const isHome = pathname === '/'
-  const solidNav = !isHome || scrolled || mobileOpen
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   useEffect(() => {
     setMobileOpen(false)
@@ -77,12 +67,7 @@ export default function Navbar() {
   return (
     <>
       <header
-        className={cn(
-          'fixed top-0 left-0 right-0 z-50 transition-all duration-200',
-          solidNav
-            ? 'bg-[#0A1628] shadow-[0_1px_0_rgba(255,255,255,0.06)]'
-            : 'bg-transparent'
-        )}
+        className="fixed top-0 left-0 right-0 z-50 bg-[#0A1628] border-b border-white/[0.07] shadow-[0_2px_20px_rgba(0,0,0,0.35)]"
       >
         {/* ─── Main nav row ─── */}
         <div className="flex items-center justify-between h-16 px-4 sm:px-6 max-w-7xl mx-auto">
