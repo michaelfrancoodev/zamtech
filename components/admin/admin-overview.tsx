@@ -144,34 +144,36 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
   return (
     <div className="min-h-screen text-white">
       {/* Top bar */}
-      <header className="sticky top-0 z-10 bg-[#0f1117]/80 backdrop-blur border-b border-white/[0.06] px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-extrabold text-white" style={{ fontFamily: 'var(--font-heading)' }}>
-            {activeTab === 'overview' ? 'Dashboard Overview' :
-              activeTab === 'service-requests' ? 'Service Requests' :
-                activeTab === 'messages' ? 'Contact Messages' : 'Support Tickets'}
-          </h1>
-          <p className="text-white/30 text-xs mt-0.5">ZamTech Automation Studio</p>
+      <header className="sticky top-0 z-10 bg-[#0f1117]/90 backdrop-blur-md border-b border-white/[0.06] px-6 py-0 flex items-center justify-between h-[58px]">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-[15px] font-extrabold text-white leading-none" style={{ fontFamily: 'var(--font-heading)' }}>
+              {activeTab === 'overview'         ? 'Dashboard Overview'  :
+               activeTab === 'service-requests' ? 'Service Requests'    :
+               activeTab === 'messages'         ? 'Contact Messages'    : 'Support Tickets'}
+            </h1>
+            <p className="text-white/25 text-[11px] mt-0.5">ZamTech Automation Studio</p>
+          </div>
         </div>
         {isPending && (
-          <div className="flex items-center gap-2 text-white/40 text-xs">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+          <div className="flex items-center gap-2 bg-white/[0.05] border border-white/[0.08] rounded-lg px-3 py-1.5 text-white/50 text-xs">
+            <Loader2 className="w-3 h-3 animate-spin" /> Saving…
           </div>
         )}
       </header>
 
       {/* Tabs */}
-      <div className="sticky top-[65px] z-10 bg-[#0f1117]/80 backdrop-blur border-b border-white/[0.06] px-6 flex gap-1">
+      <div className="sticky top-[58px] z-10 bg-[#0f1117]/90 backdrop-blur-md border-b border-white/[0.06] px-6 flex gap-0.5">
         {tabs.map((t) => (
           <button key={t.key} onClick={() => setActiveTab(t.key)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`flex items-center gap-2 px-4 py-3 text-[13px] font-semibold border-b-2 transition-all ${
               activeTab === t.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-white/40 hover:text-white/70'
+                ? 'border-[#00C8FF] text-[#00C8FF]'
+                : 'border-transparent text-white/35 hover:text-white/65 hover:border-white/20'
             }`}>
             {t.label}
             {t.count !== undefined && t.count > 0 && (
-              <span className="bg-primary/20 text-primary text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+              <span className="bg-[#00C8FF]/20 text-[#00C8FF] text-[9px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center leading-none">
                 {t.count}
               </span>
             )}
@@ -184,101 +186,123 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
         {activeTab === 'overview' && (
           <>
             {/* Stats cards */}
-            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              {stats.map((s) => {
+            <div className="grid sm:grid-cols-2 xl:grid-cols-4 gap-3">
+              {stats.map((s, idx) => {
                 const Icon = s.icon
+                const accents = [
+                  { border: 'border-[#00C8FF]/15', glow: 'bg-[#00C8FF]/8', iconBg: 'bg-[#00C8FF]/10', iconColor: 'text-[#00C8FF]' },
+                  { border: 'border-amber-500/15', glow: 'bg-amber-500/5',  iconBg: 'bg-amber-500/10',  iconColor: 'text-amber-400' },
+                  { border: 'border-orange-500/15', glow: 'bg-orange-500/5', iconBg: 'bg-orange-500/10', iconColor: 'text-orange-400' },
+                  { border: 'border-red-500/15',    glow: 'bg-red-500/5',    iconBg: 'bg-red-500/10',    iconColor: 'text-red-400' },
+                ]
+                const a = accents[idx] ?? accents[0]
                 return (
-                  <div key={s.label} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-5 hover:border-white/10 transition-colors">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="w-9 h-9 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <Icon className="w-4.5 h-4.5 text-primary" size={18} />
+                  <div key={s.label} className={`relative bg-white/[0.025] border ${a.border} rounded-2xl p-5 overflow-hidden hover:border-white/12 transition-all group`}>
+                    <div className={`absolute inset-0 ${a.glow} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    <div className="relative">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`w-10 h-10 ${a.iconBg} rounded-xl flex items-center justify-center`}>
+                        <Icon size={18} className={a.iconColor} />
                       </div>
-                      <TrendingUp className="w-4 h-4 text-white/20" />
+                      <TrendingUp className="w-4 h-4 text-white/10" />
                     </div>
-                    <p className="text-3xl font-extrabold text-white mb-1" style={{ fontFamily: 'var(--font-heading)' }}>{s.total}</p>
-                    <p className="text-white/40 text-xs">{s.label}</p>
-                    <p className={`text-xs font-semibold mt-1 ${s.badgeColor}`}>{s.badge}</p>
+                    <p className="text-[2rem] font-extrabold text-white leading-none mb-1.5" style={{ fontFamily: 'var(--font-heading)' }}>{s.total}</p>
+                    <p className="text-white/35 text-[11px] font-medium">{s.label}</p>
+                    <p className={`text-[11px] font-bold mt-1.5 ${s.badgeColor}`}>{s.badge}</p>
+                    </div>
                   </div>
                 )
               })}
             </div>
 
             {/* Recent activity — 3 columns */}
-            <div className="grid lg:grid-cols-3 gap-5">
+            <div className="grid lg:grid-cols-3 gap-4">
               {/* Recent service requests */}
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                  <div className="flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-bold text-white">Service Requests</h2>
+              <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.05]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-[#00C8FF]/10 rounded-lg flex items-center justify-center">
+                      <FileText className="w-3.5 h-3.5 text-[#00C8FF]" />
+                    </div>
+                    <h2 className="text-[13px] font-bold text-white" style={{ fontFamily: 'var(--font-heading)' }}>Service Requests</h2>
                   </div>
-                  <button onClick={() => setActiveTab('service-requests')} className="text-xs text-white/30 hover:text-primary transition-colors">View all</button>
+                  <button onClick={() => setActiveTab('service-requests')} className="text-[11px] text-white/25 hover:text-[#00C8FF] transition-colors font-medium">
+                    View all →
+                  </button>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {serviceRequests.slice(0, 5).map((sr) => (
-                    <div key={sr.id} className="px-5 py-3.5">
+                    <div key={sr.id} className="px-5 py-3 hover:bg-white/[0.02] transition-colors">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-white text-xs font-semibold truncate">{sr.fullName}</p>
+                        <p className="text-white text-[12px] font-semibold truncate leading-tight">{sr.fullName}</p>
                         <StatusBadge status={sr.status} />
                       </div>
-                      <p className="text-white/40 text-[11px] truncate">{sr.serviceType}</p>
-                      <p className="text-white/20 text-[10px] mt-0.5">{fmtDate(sr.createdAt)}</p>
+                      <p className="text-white/35 text-[11px] truncate">{sr.serviceType}</p>
+                      <p className="text-white/18 text-[10px] mt-0.5">{fmtDate(sr.createdAt)}</p>
                     </div>
                   ))}
                   {serviceRequests.length === 0 && (
-                    <p className="px-5 py-6 text-white/20 text-xs text-center">No requests yet</p>
+                    <p className="px-5 py-8 text-white/20 text-xs text-center">No requests yet</p>
                   )}
                 </div>
               </div>
 
               {/* Recent messages */}
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                  <div className="flex items-center gap-2">
-                    <InboxIcon className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-bold text-white">Messages</h2>
+              <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.05]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-amber-500/10 rounded-lg flex items-center justify-center">
+                      <InboxIcon className="w-3.5 h-3.5 text-amber-400" />
+                    </div>
+                    <h2 className="text-[13px] font-bold text-white" style={{ fontFamily: 'var(--font-heading)' }}>Messages</h2>
                   </div>
-                  <button onClick={() => setActiveTab('messages')} className="text-xs text-white/30 hover:text-primary transition-colors">View all</button>
+                  <button onClick={() => setActiveTab('messages')} className="text-[11px] text-white/25 hover:text-[#00C8FF] transition-colors font-medium">
+                    View all →
+                  </button>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {contactMessages.slice(0, 5).map((cm) => (
-                    <div key={cm.id} className="px-5 py-3.5">
+                    <div key={cm.id} className="px-5 py-3 hover:bg-white/[0.02] transition-colors">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-white text-xs font-semibold truncate">{cm.fullName}</p>
+                        <p className="text-white text-[12px] font-semibold truncate leading-tight">{cm.fullName}</p>
                         <StatusBadge status={cm.status} />
                       </div>
-                      <p className="text-white/40 text-[11px] truncate">{cm.subject}</p>
-                      <p className="text-white/20 text-[10px] mt-0.5">{fmtDate(cm.createdAt)}</p>
+                      <p className="text-white/35 text-[11px] truncate">{cm.subject}</p>
+                      <p className="text-white/18 text-[10px] mt-0.5">{fmtDate(cm.createdAt)}</p>
                     </div>
                   ))}
                   {contactMessages.length === 0 && (
-                    <p className="px-5 py-6 text-white/20 text-xs text-center">No messages yet</p>
+                    <p className="px-5 py-8 text-white/20 text-xs text-center">No messages yet</p>
                   )}
                 </div>
               </div>
 
               {/* Recent tickets */}
-              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl overflow-hidden">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-                  <div className="flex items-center gap-2">
-                    <Ticket className="w-4 h-4 text-primary" />
-                    <h2 className="text-sm font-bold text-white">Support Tickets</h2>
+              <div className="bg-white/[0.025] border border-white/[0.06] rounded-2xl overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.05]">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-orange-500/10 rounded-lg flex items-center justify-center">
+                      <Ticket className="w-3.5 h-3.5 text-orange-400" />
+                    </div>
+                    <h2 className="text-[13px] font-bold text-white" style={{ fontFamily: 'var(--font-heading)' }}>Support Tickets</h2>
                   </div>
-                  <button onClick={() => setActiveTab('tickets')} className="text-xs text-white/30 hover:text-primary transition-colors">View all</button>
+                  <button onClick={() => setActiveTab('tickets')} className="text-[11px] text-white/25 hover:text-[#00C8FF] transition-colors font-medium">
+                    View all →
+                  </button>
                 </div>
                 <div className="divide-y divide-white/[0.04]">
                   {supportTickets.slice(0, 5).map((st) => (
-                    <div key={st.id} className="px-5 py-3.5">
+                    <div key={st.id} className="px-5 py-3 hover:bg-white/[0.02] transition-colors">
                       <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className="text-white text-xs font-semibold truncate">{st.fullName}</p>
+                        <p className="text-white text-[12px] font-semibold truncate leading-tight">{st.fullName}</p>
                         <PriorityBadge priority={st.priority} />
                       </div>
-                      <p className="text-white/40 text-[11px] truncate">{st.subject}</p>
-                      <p className="text-white/20 text-[10px] mt-0.5">{fmtDate(st.createdAt)}</p>
+                      <p className="text-white/35 text-[11px] truncate">{st.subject}</p>
+                      <p className="text-white/18 text-[10px] mt-0.5">{fmtDate(st.createdAt)}</p>
                     </div>
                   ))}
                   {supportTickets.length === 0 && (
-                    <p className="px-5 py-6 text-white/20 text-xs text-center">No tickets yet</p>
+                    <p className="px-5 py-8 text-white/20 text-xs text-center">No tickets yet</p>
                   )}
                 </div>
               </div>

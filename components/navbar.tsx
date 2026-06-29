@@ -196,34 +196,25 @@ export default function Navbar() {
       </header>
 
       {/* ─── Mobile overlay ─── */}
-      <div
-        className={cn(
-          'fixed inset-0 z-40 lg:hidden transition-all duration-200',
-          mobileOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        )}
-      >
-        {/* Backdrop */}
-        <div
-          className={cn(
-            'absolute inset-0 bg-black/50 transition-opacity duration-200',
-            mobileOpen ? 'opacity-100' : 'opacity-0'
-          )}
-          onClick={() => setMobileOpen(false)}
-        />
+      {/* Dropdown drawer anchored just below the fixed header */}
+      <div className="fixed top-16 left-0 right-0 z-40 lg:hidden">
 
-        {/* Drawer */}
+        {/* Drawer — slides down from header */}
         <div
           className={cn(
-            'absolute top-16 left-0 right-0 bottom-0 bg-[#0A1628] overflow-y-auto',
-            'transition-all duration-200',
-            mobileOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+            'absolute top-0 left-0 right-0 bg-[#0A1628] overflow-y-auto',
+            'border-b border-white/[0.08] shadow-[0_20px_60px_rgba(0,0,0,0.6)]',
+            'transition-all duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
+            mobileOpen
+              ? 'opacity-100 translate-y-0 pointer-events-auto max-h-[calc(100dvh-4rem)]'
+              : 'opacity-0 -translate-y-3 pointer-events-none max-h-0 overflow-hidden'
           )}
         >
           {/* Contact strip */}
-          <div className="flex items-center gap-4 px-4 py-3 border-b border-white/8">
+          <div className="flex items-center gap-4 px-4 py-3 bg-white/[0.02] border-b border-white/[0.06]">
             <a
               href={`tel:${PHONE_RAW}`}
-              className="flex items-center gap-2 text-xs text-white/50 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-xs text-white/45 hover:text-white transition-colors"
             >
               <Phone size={12} className="text-[#00C8FF]" />
               {PHONE}
@@ -232,7 +223,7 @@ export default function Navbar() {
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 text-xs text-white/50 hover:text-white transition-colors"
+              className="flex items-center gap-2 text-xs text-white/45 hover:text-white transition-colors"
             >
               <WhatsAppIcon size={12} className="text-[#25D366]" />
               WhatsApp
@@ -245,30 +236,33 @@ export default function Navbar() {
               link.children ? (
                 <div key={link.label} className="mb-0.5">
                   <button
-                    className="w-full flex items-center justify-between px-3 py-3 rounded-lg text-white/75 text-sm font-medium hover:bg-white/6 hover:text-white transition-colors"
+                    className="w-full flex items-center justify-between px-3 py-3.5 rounded-xl text-white/75 text-sm font-semibold hover:bg-white/6 hover:text-white active:scale-[0.99] transition-all"
                     onClick={() => setMobileExpanded(mobileExpanded === link.label ? null : link.label)}
                   >
                     <span>{link.label}</span>
                     <ChevronDown
                       size={14}
-                      className={cn('text-white/30 transition-transform duration-150', mobileExpanded === link.label && 'rotate-180')}
+                      className={cn('text-white/30 transition-transform duration-200', mobileExpanded === link.label && 'rotate-180')}
                     />
                   </button>
                   <div
                     className={cn(
-                      'overflow-hidden transition-all duration-200',
-                      mobileExpanded === link.label ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                      'overflow-hidden transition-all duration-250 ease-[cubic-bezier(0.22,1,0.36,1)]',
+                      mobileExpanded === link.label ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
                     )}
                   >
-                    <div className="pl-2 pb-1">
+                    <div className="pl-3 pr-1 pb-2 space-y-0.5">
                       {link.children.map(child => (
                         <Link
                           key={child.href}
                           href={child.href}
-                          className="flex items-center justify-between px-3 py-2.5 rounded-lg text-white/60 text-sm hover:text-white hover:bg-white/6 transition-colors"
+                          className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-white/6 transition-colors group"
                         >
-                          <span>{child.label}</span>
-                          <ChevronRight size={13} className="text-white/25" />
+                          <div className="w-1.5 h-1.5 rounded-full bg-[#00C8FF]/40 shrink-0 mt-[5px] group-hover:bg-[#00C8FF] transition-colors" />
+                          <div>
+                            <p className="text-white/70 text-sm font-medium group-hover:text-white transition-colors">{child.label}</p>
+                            <p className="text-white/30 text-xs mt-0.5">{child.desc}</p>
+                          </div>
                         </Link>
                       ))}
                     </div>
@@ -279,32 +273,33 @@ export default function Navbar() {
                   key={link.label}
                   href={link.href}
                   className={cn(
-                    'flex items-center justify-between px-3 py-3 rounded-lg text-sm font-medium transition-colors mb-0.5',
+                    'flex items-center justify-between px-3 py-3.5 rounded-xl text-sm font-semibold transition-all mb-0.5 active:scale-[0.99]',
                     pathname === link.href
-                      ? 'bg-[#00C8FF]/15 text-[#00C8FF]'
+                      ? 'bg-[#00C8FF]/12 text-[#00C8FF] border border-[#00C8FF]/15'
                       : 'text-white/75 hover:text-white hover:bg-white/6'
                   )}
                 >
                   {link.label}
+                  {pathname === link.href && <span className="w-1.5 h-1.5 rounded-full bg-[#00C8FF]" />}
                 </Link>
               )
             )}
           </nav>
 
           {/* Mobile CTAs */}
-          <div className="px-4 pb-8 pt-2 flex flex-col gap-3 border-t border-white/8 mt-2">
+          <div className="px-4 pb-6 pt-2 flex flex-col gap-2.5 border-t border-white/[0.06] mt-1">
             <a
               href={WA_LINK}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl border border-white/15 text-white text-sm font-semibold hover:bg-white/6 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl border border-white/12 text-white text-sm font-semibold hover:bg-white/6 active:scale-[0.98] transition-all"
             >
               <WhatsAppIcon size={16} className="text-[#25D366]" />
               Chat on WhatsApp
             </a>
             <Link
               href="/request-service"
-              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#00C8FF] text-[#001a24] text-sm font-bold hover:bg-[#00b8eb] transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl bg-[#00C8FF] text-[#001a24] text-sm font-bold hover:bg-[#00b8eb] active:scale-[0.98] transition-all shadow-lg shadow-[#00C8FF]/20"
             >
               Get a Free Quote
             </Link>
