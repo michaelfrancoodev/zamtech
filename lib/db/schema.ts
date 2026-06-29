@@ -50,6 +50,7 @@ export const verification = pgTable('verification', {
 // ─── App tables ──────────────────────────────────────────────────────────────
 export const serviceRequests = pgTable('service_requests', {
   id: serial('id').primaryKey(),
+  trackingToken: text('tracking_token').unique(),
   fullName: text('full_name').notNull(),
   email: text('email').notNull(),
   phone: text('phone').notNull(),
@@ -79,6 +80,7 @@ export const contactMessages = pgTable('contact_messages', {
 
 export const supportTickets = pgTable('support_tickets', {
   id: serial('id').primaryKey(),
+  trackingToken: text('tracking_token').unique(),
   fullName: text('full_name').notNull(),
   email: text('email').notNull(),
   phone: text('phone'),
