@@ -1,5 +1,5 @@
 /**
- * ZamTech — Email & WhatsApp Notification Library
+ * ZamTech — Email Notification Library
  *
  * DRIVERS (set EMAIL_DRIVER env var):
  *   smtp   — Gmail or any SMTP server (default for local/staging)
@@ -10,29 +10,18 @@
  *   support@zamtech.co.tz       — support tickets
  *   noreply@zamtech.co.tz       — system / tracking confirmations
  *   welcome@zamtech.co.tz       — (reserved for onboarding)
- *
- * WHATSAPP:
- *   Admin  — CallMeBot free API (instant push to your personal WhatsApp)
- *   Client — WhatsApp deep link in confirmation email (no API needed)
- *
- * SETUP CALLMEBOT (one-time, free):
- *   1. Add +34 644 82 17 63 to contacts as "CallMeBot"
- *   2. Send "I allow callmebot to send me messages" on WhatsApp to that number
- *   3. You receive an apikey back — put it in CALLMEBOT_API_KEY
- *   4. Set ADMIN_WHATSAPP_PHONE=255796985138 (no + sign)
  */
 
 import nodemailer from 'nodemailer'
 
 // ─── Env config ───────────────────────────────────────────────────────────────
 
-const SITE_URL      = process.env.NEXT_PUBLIC_SITE_URL   ?? 'https://zamtech.co.tz'
+const SITE_URL      = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zamtech.co.tz'
 const SITE_DOMAIN   = SITE_URL.replace(/^https?:\/\//, '') // zamtech.co.tz
-const ADMIN_EMAIL   = process.env.ADMIN_EMAIL             // set in Vercel env vars — no fallback shown to users
-const DRIVER        = process.env.EMAIL_DRIVER            ?? 'smtp'   // 'smtp' | 'resend'
+const ADMIN_EMAIL   = process.env.ADMIN_EMAIL              // set in Vercel env vars — no fallback shown to users
+const DRIVER        = process.env.EMAIL_DRIVER             ?? 'smtp' // 'smtp' | 'resend'
 const RESEND_KEY    = process.env.RESEND_API_KEY
-const ADMIN_PHONE   = process.env.ADMIN_WHATSAPP_PHONE    // e.g. 255796985138
-const WA_API_KEY    = process.env.CALLMEBOT_API_KEY
+const WA_PHONE      = '255796985138'                       // WhatsApp link in client emails (static)
 
 // Role-based from addresses — exactly like GitHub / Vercel
 const FROM_ADDRESSES = {
@@ -63,16 +52,6 @@ function createTransport() {
     })
   }
   return null
-}
-
-// ─── WhatsApp to admin via CallMeBot ─────────────────────────────────────────
-
-async function notifyAdminWhatsApp(message: string) {
-  if (!ADMIN_PHONE || !WA_API_KEY) return
-  try {
-    const url = `https://api.callmebot.com/whatsapp.php?phone=${ADMIN_PHONE}&text=${encodeURIComponent(message)}&apikey=${WA_API_KEY}`
-    await fetch(url, { method: 'GET' })
-  } catch { /* non-critical */ }
 }
 
 // ─── Shared HTML shell ────────────────────────────────────────────────────────
@@ -118,7 +97,7 @@ function shell(badge: string, body: string) {
         &copy; ${new Date().getFullYear()} ZamTech Automation Studio &mdash; Mbeya, Tanzania<br/>
         <a href="${SITE_URL}" style="color:#00C8FF;text-decoration:none;">${SITE_DOMAIN}</a>
         &nbsp;&bull;&nbsp;
-        <a href="https://wa.me/${ADMIN_PHONE ?? '255796985138'}" style="color:#00C8FF;text-decoration:none;">WhatsApp Support</a>
+        <a href="https://wa.me/${WA_PHONE}" style="color:#00C8FF;text-decoration:none;">WhatsApp Support</a>
       </p>
     </td>
   </tr>
@@ -205,16 +184,6 @@ export async function sendServiceRequestEmail(data: {
     }).catch(() => {})
   }
 
-  // ── Admin WhatsApp ──
-  await notifyAdminWhatsApp(
-    `*New Service Request* — ZamTech\n\n` +
-    `Service: ${data.serviceType}\n` +
-    `Client: ${data.fullName}\n` +
-    `Phone: +${data.phone.replace(/^\+/, '')}\n` +
-    `Email: ${data.email}\n` +
-    (data.budgetRange ? `Budget: ${data.budgetRange}\n` : '') +
-    `\nDashboard: ${SITE_URL}/admin?tab=service-requests`
-  )
 }
 
 // ─── Client confirmation (sent separately from submitServiceRequest action) ───
@@ -243,7 +212,7 @@ export async function sendClientServiceConfirmation(data: {
       ${refBox(data.token)}
       <p style="margin:16px 0 0;color:#9ca3af;font-size:13px;line-height:1.7;">
         Have an urgent question? You can reply directly to this email or reach us on
-        <a href="https://wa.me/${ADMIN_PHONE ?? '255796985138'}" style="color:#00C8FF;text-decoration:none;font-weight:600;">WhatsApp</a>
+        <a href="https://wa.me/${WA_PHONE}" style="color:#00C8FF;text-decoration:none;font-weight:600;">WhatsApp</a>
         and we will respond promptly.
       </p>
     `),
@@ -302,7 +271,7 @@ export async function sendContactEmail(data: {
           A member of our team will get back to you within <strong>24 hours</strong>.
           If you need a faster response, feel free to reach us directly on WhatsApp.
         </p>
-        ${cta('Chat With Us on WhatsApp', `https://wa.me/${ADMIN_PHONE ?? '255796985138'}`)}
+        ${cta('Chat With Us on WhatsApp', `https://wa.me/${WA_PHONE}`)}
         <p style="margin:20px 0 0;color:#9ca3af;font-size:12px;line-height:1.7;text-align:center;">
           This is an automated acknowledgement. Please do not reply to this email —
           a team member will contact you from our main address.
@@ -310,20 +279,10 @@ export async function sendContactEmail(data: {
       `),
     }).catch(() => {})
   }
-
-  // ── Admin WhatsApp ──
-  await notifyAdminWhatsApp(
-    `*New Contact Message* — ZamTech\n\n` +
-    `Subject: ${data.subject}\n` +
-    `From: ${data.fullName}\n` +
-    `Phone: ${data.phone ?? 'N/A'}\n` +
-    `Email: ${data.email}\n` +
-    `\nDashboard: ${SITE_URL}/admin?tab=messages`
-  )
 }
 
 
-// ═══════════════════════════════════════════════════════════════════════════════
+// ══════════���════════════════════════════════════════════════════════════════════
 // 3. SUPPORT TICKET
 //    FROM: support@zamtech.co.tz
 //    Admin  gets: ticket details + priority badge + WhatsApp push
@@ -365,17 +324,6 @@ export async function sendSupportTicketEmail(data: {
     }).catch(() => {})
   }
 
-  // ── Admin WhatsApp ──
-  const urgentPrefix = data.priority === 'urgent' ? '⚠️ URGENT — ' : ''
-  await notifyAdminWhatsApp(
-    `${urgentPrefix}*New Support Ticket* — ZamTech\n\n` +
-    `Category: ${data.issueCategory}\n` +
-    `Priority: ${(data.priority ?? 'normal').toUpperCase()}\n` +
-    `From: ${data.fullName}\n` +
-    `Phone: ${data.phone ?? 'N/A'}\n` +
-    `Email: ${data.email}\n` +
-    `\nDashboard: ${SITE_URL}/admin?tab=tickets`
-  )
 }
 
 // ─── Client ticket confirmation ───────────────────────────────────────────────
@@ -404,7 +352,7 @@ export async function sendClientTicketConfirmation(data: {
       ${refBox(data.token)}
       <p style="margin:16px 0 0;color:#9ca3af;font-size:13px;line-height:1.7;">
         For urgent assistance, contact us directly on
-        <a href="https://wa.me/${ADMIN_PHONE ?? '255796985138'}" style="color:#00C8FF;text-decoration:none;font-weight:600;">WhatsApp</a>.
+        <a href="https://wa.me/${WA_PHONE}" style="color:#00C8FF;text-decoration:none;font-weight:600;">WhatsApp</a>.
         You can also reply to this email and it will reach our support team.
       </p>
     `),
