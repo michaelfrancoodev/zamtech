@@ -5,11 +5,13 @@ import { formatDistanceToNow } from 'date-fns'
 import {
   FileText, InboxIcon, Ticket, TrendingUp, CheckCircle, Clock, AlertCircle,
   Eye, Trash2, MessageSquare, Loader2, X, ChevronDown, ChevronUp,
+  Users, UserPlus, ShieldCheck, KeyRound,
 } from 'lucide-react'
 import {
   updateServiceRequestStatus, deleteServiceRequest,
   updateContactMessageStatus, deleteContactMessage,
   updateSupportTicketStatus, deleteSupportTicket,
+  createAdminUser, deleteAdminUser,
 } from '@/app/actions/data'
 
 type ServiceRequest = {
@@ -33,12 +35,16 @@ type Counts = {
   contactMessages: { total: number; unread: number }
   supportTickets: { total: number; open: number }
 }
+type AdminUser = {
+  id: string; name: string; email: string; createdAt: Date
+}
 
 interface Props {
   counts: Counts
   serviceRequests: ServiceRequest[]
   contactMessages: ContactMessage[]
   supportTickets: SupportTicket[]
+  adminUsers: AdminUser[]
   initialTab?: string
 }
 
@@ -79,11 +85,11 @@ function PriorityBadge({ priority }: { priority: string }) {
   )
 }
 
-type Tab = 'overview' | 'service-requests' | 'messages' | 'tickets'
+type Tab = 'overview' | 'service-requests' | 'messages' | 'tickets' | 'users'
 
-const VALID_TABS: Tab[] = ['overview', 'service-requests', 'messages', 'tickets']
+const VALID_TABS: Tab[] = ['overview', 'service-requests', 'messages', 'tickets', 'users']
 
-export default function AdminOverview({ counts, serviceRequests, contactMessages, supportTickets, initialTab }: Props) {
+export default function AdminOverview({ counts, serviceRequests, contactMessages, supportTickets, adminUsers, initialTab }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>(
     VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'overview'
   )
@@ -92,6 +98,13 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
   const [replyText, setReplyText] = useState('')
   const [replyTarget, setReplyTarget] = useState<{ type: string; id: number } | null>(null)
 
+  // User management state
+  const [usersList, setUsersList] = useState<AdminUser[]>(adminUsers)
+  const [showAddForm, setShowAddForm] = useState(false)
+  const [newUser, setNewUser] = useState({ name: '', email: '', password: '' })
+  const [userError, setUserError] = useState('')
+  const [userSuccess, setUserSuccess] = useState('')
+
   const totalNew = counts.serviceRequests.new + counts.contactMessages.unread + counts.supportTickets.open
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
@@ -99,6 +112,7 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
     { key: 'service-requests', label: 'Service Requests', count: counts.serviceRequests.new },
     { key: 'messages', label: 'Messages', count: counts.contactMessages.unread },
     { key: 'tickets', label: 'Tickets', count: counts.supportTickets.open },
+    { key: 'users', label: 'Admins' },
   ]
 
   function fmtDate(d: Date) {
@@ -126,6 +140,37 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
   const handleSTDelete = (id: number) => {
     if (!confirm('Delete this ticket?')) return
     startTransition(() => deleteSupportTicket(id))
+  }
+  const handleCreateUser = () => {
+    setUserError('')
+    setUserSuccess('')
+    if (!newUser.name.trim() || !newUser.email.trim() || newUser.password.length < 8) {
+      setUserError('Name, email, and password (min 8 chars) are required.')
+      return
+    }
+    startTransition(async () => {
+      try {
+        await createAdminUser(newUser)
+        setUserSuccess(`Admin "${newUser.name}" created successfully.`)
+        setNewUser({ name: '', email: '', password: '' })
+        setShowAddForm(false)
+        // Optimistically add to list
+        setUsersList(prev => [...prev, { id: crypto.randomUUID(), ...newUser, createdAt: new Date() }])
+      } catch (e) {
+        setUserError(e instanceof Error ? e.message : 'Failed to create admin user.')
+      }
+    })
+  }
+  const handleDeleteUser = (id: string, name: string) => {
+    if (!confirm(`Remove admin "${name}"? They will no longer be able to log in.`)) return
+    startTransition(async () => {
+      try {
+        await deleteAdminUser(id)
+        setUsersList(prev => prev.filter(u => u.id !== id))
+      } catch (e) {
+        alert(e instanceof Error ? e.message : 'Failed to delete admin user.')
+      }
+    })
   }
 
   const submitReply = () => {
@@ -565,6 +610,123 @@ export default function AdminOverview({ counts, serviceRequests, contactMessages
                 </div>
               )
             })}
+          </div>
+        )}
+
+        {/* ─── USERS TAB ────────────────────────────────────────────────────── */}
+        {activeTab === 'users' && (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-[#00C8FF]/10 rounded-xl flex items-center justify-center">
+                  <ShieldCheck className="w-4.5 h-4.5 text-[#00C8FF]" />
+                </div>
+                <div>
+                  <p className="text-white font-semibold text-sm">Admin Accounts</p>
+                  <p className="text-white/30 text-xs">{usersList.length} admin{usersList.length !== 1 ? 's' : ''} total</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowAddForm(v => !v); setUserError(''); setUserSuccess('') }}
+                className="flex items-center gap-2 px-4 py-2 bg-[#00C8FF]/10 border border-[#00C8FF]/20 text-[#00C8FF] text-xs font-semibold rounded-lg hover:bg-[#00C8FF]/20 transition-colors"
+              >
+                <UserPlus className="w-3.5 h-3.5" />
+                {showAddForm ? 'Cancel' : 'Add Admin'}
+              </button>
+            </div>
+
+            {/* Add form */}
+            {showAddForm && (
+              <div className="bg-white/[0.03] border border-[#00C8FF]/20 rounded-xl p-5 space-y-3">
+                <p className="text-white/60 text-xs font-semibold uppercase tracking-wide mb-2 flex items-center gap-2">
+                  <KeyRound className="w-3.5 h-3.5 text-[#00C8FF]" /> New Admin Account
+                </p>
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-white/30 text-[11px] font-medium mb-1 block">Full Name</label>
+                    <input
+                      type="text"
+                      value={newUser.name}
+                      onChange={e => setNewUser(p => ({ ...p, name: e.target.value }))}
+                      placeholder="e.g. Jane Doe"
+                      className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00C8FF]/40"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-white/30 text-[11px] font-medium mb-1 block">Email Address</label>
+                    <input
+                      type="email"
+                      value={newUser.email}
+                      onChange={e => setNewUser(p => ({ ...p, email: e.target.value }))}
+                      placeholder="admin@zamtech.co.tz"
+                      className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00C8FF]/40"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="text-white/30 text-[11px] font-medium mb-1 block">Password (min 8 characters)</label>
+                    <input
+                      type="password"
+                      value={newUser.password}
+                      onChange={e => setNewUser(p => ({ ...p, password: e.target.value }))}
+                      placeholder="••••••••"
+                      className="w-full bg-white/[0.05] border border-white/10 text-white placeholder:text-white/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#00C8FF]/40"
+                    />
+                  </div>
+                </div>
+                {userError && (
+                  <p className="text-red-400 text-xs bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{userError}</p>
+                )}
+                <button
+                  onClick={handleCreateUser}
+                  disabled={isPending}
+                  className="flex items-center gap-2 px-5 py-2 bg-[#00C8FF] text-[#001a24] text-xs font-bold rounded-lg hover:bg-[#00b8eb] disabled:opacity-50 transition-colors"
+                >
+                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <UserPlus className="w-3.5 h-3.5" />}
+                  Create Admin
+                </button>
+              </div>
+            )}
+
+            {userSuccess && (
+              <div className="flex items-center gap-2 text-green-400 text-xs bg-green-500/10 border border-green-500/20 rounded-xl px-4 py-3">
+                <CheckCircle className="w-3.5 h-3.5 shrink-0" />
+                {userSuccess}
+              </div>
+            )}
+
+            {/* Users list */}
+            {usersList.length === 0 ? (
+              <div className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-12 text-center">
+                <Users className="w-8 h-8 text-white/20 mx-auto mb-3" />
+                <p className="text-white/30 text-sm">No admin users found</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {usersList.map((u) => (
+                  <div key={u.id} className="flex items-center gap-4 bg-white/[0.03] border border-white/[0.06] rounded-xl px-5 py-3.5 hover:border-white/10 transition-colors">
+                    <div className="w-9 h-9 bg-[#00C8FF]/15 rounded-full flex items-center justify-center shrink-0">
+                      <span className="text-[#00C8FF] font-bold text-sm">{u.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white text-sm font-semibold">{u.name}</p>
+                      <p className="text-white/40 text-xs">{u.email}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-white/20 text-[10px]">Added {fmtDate(u.createdAt)}</span>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteUser(u.id, u.name)}
+                      disabled={isPending}
+                      title="Remove admin"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-red-400/50 hover:text-red-400 hover:bg-red-500/10 transition-colors disabled:opacity-40"
+                    >
+                      <Trash2 className="w-3 h-3" /> Remove
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

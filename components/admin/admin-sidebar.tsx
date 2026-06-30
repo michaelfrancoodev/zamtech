@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   LayoutDashboard, InboxIcon, Ticket, FileText,
-  LogOut, Globe,
+  LogOut, Globe, Users,
 } from 'lucide-react'
 import { signOut } from '@/lib/auth-client'
 
@@ -18,6 +18,7 @@ const navItems = [
   { href: '/admin?tab=service-requests',   tab: 'service-requests',  label: 'Service Requests',icon: FileText },
   { href: '/admin?tab=messages',           tab: 'messages',          label: 'Messages',        icon: InboxIcon },
   { href: '/admin?tab=tickets',            tab: 'tickets',           label: 'Support Tickets', icon: Ticket },
+  { href: '/admin?tab=users',              tab: 'users',             label: 'Manage Admins',   icon: Users },
 ]
 
 export default function AdminSidebar({ user }: AdminSidebarProps) {

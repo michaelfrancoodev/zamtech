@@ -1,4 +1,4 @@
-import { getDashboardCounts, getServiceRequests, getContactMessages, getSupportTickets } from '@/app/actions/data'
+import { getDashboardCounts, getServiceRequests, getContactMessages, getSupportTickets, getAdminUsers } from '@/app/actions/data'
 import AdminOverview from '@/components/admin/admin-overview'
 
 export default async function AdminDashboardPage({
@@ -8,11 +8,12 @@ export default async function AdminDashboardPage({
 }) {
   const { tab } = await searchParams
 
-  const [counts, serviceRequests, contactMessages, supportTickets] = await Promise.all([
+  const [counts, serviceRequests, contactMessages, supportTickets, adminUsers] = await Promise.all([
     getDashboardCounts(),
     getServiceRequests(),
     getContactMessages(),
     getSupportTickets(),
+    getAdminUsers(),
   ])
 
   return (
@@ -21,6 +22,7 @@ export default async function AdminDashboardPage({
       serviceRequests={serviceRequests}
       contactMessages={contactMessages}
       supportTickets={supportTickets}
+      adminUsers={adminUsers}
       initialTab={tab}
     />
   )

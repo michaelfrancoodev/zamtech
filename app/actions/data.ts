@@ -1,7 +1,7 @@
 'use server'
 
 import { db, ensureMigrations } from '@/lib/db'
-import { serviceRequests, contactMessages, supportTickets } from '@/lib/db/schema'
+import { serviceRequests, contactMessages, supportTickets, user as userTable } from '@/lib/db/schema'
 import { auth } from '@/lib/auth'
 import { eq, desc, sql } from 'drizzle-orm'
 import { headers } from 'next/headers'
@@ -199,6 +199,40 @@ export async function updateSupportTicketStatus(id: number, status: string, admi
 export async function deleteSupportTicket(id: number) {
   await requireAdmin()
   await db.delete(supportTickets).where(eq(supportTickets.id, id))
+  revalidatePath('/admin')
+}
+
+// ─── Admin: User management ───────────────────────────────────────────────────
+
+export async function getAdminUsers() {
+  await requireAdmin()
+  return db
+    .select({
+      id: userTable.id,
+      name: userTable.name,
+      email: userTable.email,
+      createdAt: userTable.createdAt,
+    })
+    .from(userTable)
+    .orderBy(desc(userTable.createdAt))
+}
+
+export async function createAdminUser(data: { name: string; email: string; password: string }) {
+  await requireAdmin()
+  await auth.api.signUpEmail({
+    body: {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+    },
+  })
+  revalidatePath('/admin')
+}
+
+export async function deleteAdminUser(targetId: string) {
+  const me = await requireAdmin()
+  if (me.id === targetId) throw new Error('You cannot delete your own account')
+  await db.delete(userTable).where(eq(userTable.id, targetId))
   revalidatePath('/admin')
 }
 
