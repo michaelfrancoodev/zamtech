@@ -102,9 +102,9 @@ export default function BlogPage() {
 
           <div className="grid md:grid-cols-2 gap-6 mb-14">
             {featured.map((post) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
               <article
-                key={post.slug}
-                className="group bg-white border border-border rounded-2xl p-7 flex flex-col hover:border-[#00C8FF]/30 hover:shadow-lg hover:shadow-[#00C8FF]/5 transition-all"
+                className="bg-white border border-border rounded-2xl p-7 flex flex-col hover:border-[#00C8FF]/30 hover:shadow-lg hover:shadow-[#00C8FF]/5 transition-all h-full"
               >
                 <span className={`self-start text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-4 ${categoryColors[post.category] ?? 'bg-slate-100 text-slate-500'}`}>
                   {post.category}
@@ -127,6 +127,7 @@ export default function BlogPage() {
                   </span>
                 </div>
               </article>
+              </Link>
             ))}
           </div>
 
@@ -137,9 +138,9 @@ export default function BlogPage() {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {rest.map((post) => (
+              <Link key={post.slug} href={`/blog/${post.slug}`} className="group">
               <article
-                key={post.slug}
-                className="group bg-white border border-border rounded-2xl p-6 flex flex-col hover:border-[#00C8FF]/30 hover:shadow-md hover:shadow-[#00C8FF]/5 transition-all"
+                className="bg-white border border-border rounded-2xl p-6 flex flex-col hover:border-[#00C8FF]/30 hover:shadow-md hover:shadow-[#00C8FF]/5 transition-all h-full"
               >
                 <span className={`self-start text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-3 ${categoryColors[post.category] ?? 'bg-slate-100 text-slate-500'}`}>
                   {post.category}
@@ -158,6 +159,7 @@ export default function BlogPage() {
                   </span>
                 </div>
               </article>
+              </Link>
             ))}
           </div>
         </div>

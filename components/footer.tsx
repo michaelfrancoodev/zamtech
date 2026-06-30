@@ -20,6 +20,7 @@ const WA_LINK   = `https://wa.me/${PHONE_RAW.replace('+', '')}`
 const COL_COMPANY = [
   { label: 'About Us',     href: '/about' },
   { label: 'Services',     href: '/services' },
+  { label: 'Portfolio',    href: '/portfolio' },
   { label: 'Pricing',      href: '/pricing' },
   { label: 'Blog',         href: '/blog' },
   { label: 'Careers',      href: '/careers' },

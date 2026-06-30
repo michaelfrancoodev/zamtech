@@ -409,12 +409,18 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="reveal text-center mt-12">
+            <div className="reveal text-center mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link
-                href="/request-service"
+                href="/portfolio"
                 className="inline-flex items-center gap-2 bg-[#00C8FF] text-[#001a24] font-bold text-sm px-7 py-3.5 rounded-xl hover:bg-[#00b8eb] active:scale-[0.98] transition-all shadow-lg shadow-[#00C8FF]/25"
               >
-                Start a Similar Project <ArrowRight size={15} />
+                View Full Portfolio <ArrowRight size={15} />
+              </Link>
+              <Link
+                href="/request-service"
+                className="inline-flex items-center gap-2 bg-white/[0.08] border border-white/[0.12] text-white font-semibold text-sm px-7 py-3.5 rounded-xl hover:bg-white/[0.14] transition-all"
+              >
+                Start a Similar Project <ChevronRight size={15} />
               </Link>
             </div>
           </div>
@@ -422,7 +428,7 @@ export default function HomePage() {
 
         {/* ═══════════════════════════════════════════
             HOW WE WORK
-        ═══════════════════════════════════════════ */}
+        ════════════════════════════════════════���══ */}
         <RevealSection className="py-16 sm:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
             <div className="reveal text-center mb-14">

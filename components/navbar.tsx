@@ -24,9 +24,10 @@ const NAV_LINKS = [
       { label: 'Testimonials', href: '/testimonials', desc: 'What our clients say' },
     ],
   },
-  { label: 'Services', href: '/services' },
-  { label: 'Pricing',  href: '/pricing' },
-  { label: 'Blog',     href: '/blog' },
+  { label: 'Services',  href: '/services' },
+  { label: 'Portfolio', href: '/portfolio' },
+  { label: 'Pricing',   href: '/pricing' },
+  { label: 'Blog',      href: '/blog' },
   {
     label: 'Help',
     href: '#',
