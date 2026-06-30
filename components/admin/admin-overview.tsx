@@ -39,6 +39,7 @@ interface Props {
   serviceRequests: ServiceRequest[]
   contactMessages: ContactMessage[]
   supportTickets: SupportTicket[]
+  initialTab?: string
 }
 
 // Status badge
@@ -80,8 +81,12 @@ function PriorityBadge({ priority }: { priority: string }) {
 
 type Tab = 'overview' | 'service-requests' | 'messages' | 'tickets'
 
-export default function AdminOverview({ counts, serviceRequests, contactMessages, supportTickets }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('overview')
+const VALID_TABS: Tab[] = ['overview', 'service-requests', 'messages', 'tickets']
+
+export default function AdminOverview({ counts, serviceRequests, contactMessages, supportTickets, initialTab }: Props) {
+  const [activeTab, setActiveTab] = useState<Tab>(
+    VALID_TABS.includes(initialTab as Tab) ? (initialTab as Tab) : 'overview'
+  )
   const [isPending, startTransition] = useTransition()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [replyText, setReplyText] = useState('')

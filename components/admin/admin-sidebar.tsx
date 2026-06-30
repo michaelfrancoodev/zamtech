@@ -2,10 +2,10 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   LayoutDashboard, InboxIcon, Ticket, FileText,
-  LogOut, ChevronLeft, Globe,
+  LogOut, Globe,
 } from 'lucide-react'
 import { signOut } from '@/lib/auth-client'
 
@@ -14,15 +14,17 @@ interface AdminSidebarProps {
 }
 
 const navItems = [
-  { href: '/admin',                  label: 'Overview',        icon: LayoutDashboard, exact: true },
-  { href: '/admin/service-requests', label: 'Service Requests',icon: FileText },
-  { href: '/admin/messages',         label: 'Messages',        icon: InboxIcon },
-  { href: '/admin/tickets',          label: 'Support Tickets', icon: Ticket },
+  { href: '/admin',                        tab: '',                  label: 'Overview',        icon: LayoutDashboard },
+  { href: '/admin?tab=service-requests',   tab: 'service-requests',  label: 'Service Requests',icon: FileText },
+  { href: '/admin?tab=messages',           tab: 'messages',          label: 'Messages',        icon: InboxIcon },
+  { href: '/admin?tab=tickets',            tab: 'tickets',           label: 'Support Tickets', icon: Ticket },
 ]
 
 export default function AdminSidebar({ user }: AdminSidebarProps) {
-  const pathname = usePathname()
-  const router   = useRouter()
+  const pathname     = usePathname()
+  const router       = useRouter()
+  const searchParams = useSearchParams()
+  const currentTab   = searchParams.get('tab') ?? ''
 
   const handleSignOut = async () => {
     await signOut()
@@ -63,10 +65,10 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
         </p>
         {navItems.map((item) => {
           const Icon   = item.icon
-          const active = item.exact ? pathname === item.href : pathname.startsWith(item.href)
+          const active = pathname === '/admin' && currentTab === item.tab
           return (
             <Link
-              key={item.href}
+              key={item.tab}
               href={item.href}
               className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all group ${
                 active
@@ -74,7 +76,6 @@ export default function AdminSidebar({ user }: AdminSidebarProps) {
                   : 'text-white/45 hover:text-white/80 hover:bg-white/[0.05]'
               }`}
             >
-              {/* Active left bar */}
               {active && (
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 bg-[#00C8FF] rounded-r-full" />
               )}

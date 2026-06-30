@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Target, Eye, Heart, Users, Award, Lightbulb, Handshake } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'About Us',
+  description: 'Learn about ZamTech Automation Studio — our story, mission, values, and the team behind Mbeya\'s leading ICT company.',
+  alternates: { canonical: '/about' },
+  openGraph: { title: 'About ZamTech | ICT Company Mbeya Tanzania', description: 'Our story, mission, values, and team.', url: '/about' },
+}
 
 const values = [
   { icon: Award,     title: 'Excellence',    desc: 'We deliver the highest quality in everything we build — no shortcuts, no compromise.' },

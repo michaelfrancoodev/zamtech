@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Star, Quote, ArrowRight } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'Client Reviews & Testimonials',
+  description: 'Read what our clients across Tanzania say about ZamTech. Real reviews from businesses we have built websites, mobile apps, and ERP systems for.',
+  alternates: { canonical: '/testimonials' },
+  openGraph: { title: 'Client Reviews | ZamTech Tanzania', description: 'Real testimonials from businesses across Tanzania.', url: '/testimonials' },
+}
 
 const WA = 'https://wa.me/255796985138'
 

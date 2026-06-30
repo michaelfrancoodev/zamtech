@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import PageWrapper from '@/components/page-wrapper'
+
+export const metadata: Metadata = {
+  title: 'Terms & Conditions',
+  description: 'ZamTech Automation Studio terms and conditions governing use of our website and engagement of our ICT services.',
+  alternates: { canonical: '/terms' },
+  robots: { index: true, follow: false },
+}
 
 const sections = [
   {

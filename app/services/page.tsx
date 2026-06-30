@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import {
   Globe, Smartphone, Database, Settings, Users, BarChart3, CheckCircle, ArrowRight,
@@ -5,6 +6,13 @@ import {
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'ICT Services',
+  description: 'Explore ZamTech\'s full range of ICT services — web development, mobile apps, ERP systems, database solutions, ICT consultancy, and digital transformation for Tanzanian businesses.',
+  alternates: { canonical: '/services' },
+  openGraph: { title: 'ICT Services | ZamTech Automation Studio', description: 'Web development, mobile apps, ERP, database solutions, and digital transformation in Tanzania.', url: '/services' },
+}
 
 const WA = 'https://wa.me/255796985138'
 

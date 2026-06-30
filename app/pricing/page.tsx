@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle, ArrowRight, X, Zap } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'Pricing & Packages',
+  description: 'Transparent ICT service pricing in Tanzania. Starter packages from TZS 500,000 up to full enterprise solutions — no hidden fees, clear deliverables.',
+  alternates: { canonical: '/pricing' },
+  openGraph: { title: 'Pricing & Packages | ZamTech Tanzania', description: 'Clear ICT pricing with no hidden fees. From TZS 500,000.', url: '/pricing' },
+}
 
 const WA = 'https://wa.me/255796985138'
 

@@ -1,8 +1,16 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowRight, Briefcase, Heart, Users, Zap, GraduationCap, Mail } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'Careers',
+  description: 'Join the ZamTech team in Mbeya, Tanzania. We are looking for talented developers, designers, and ICT professionals passionate about building technology for Africa.',
+  alternates: { canonical: '/careers' },
+  openGraph: { title: 'Careers at ZamTech | Join Our Team', description: "Work with Tanzania's leading ICT studio.", url: '/careers' },
+}
 
 const WA = 'https://wa.me/255796985138'
 

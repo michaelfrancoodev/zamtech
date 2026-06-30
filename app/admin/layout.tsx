@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { auth } from '@/lib/auth'
@@ -15,7 +16,10 @@ export default async function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#0f1117] flex">
-      <AdminSidebar user={session.user} />
+      {/* Suspense required because AdminSidebar uses useSearchParams() */}
+      <Suspense fallback={<div className="w-60 shrink-0 bg-[#070b14] border-r border-white/[0.06]" />}>
+        <AdminSidebar user={session.user} />
+      </Suspense>
       <main className="flex-1 overflow-auto">
         {children}
       </main>

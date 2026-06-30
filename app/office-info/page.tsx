@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { MapPin, Phone, Mail, Clock, Calendar, MessageCircle, Navigation } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
+
+export const metadata: Metadata = {
+  title: 'Office Location & Hours',
+  description: 'Visit ZamTech Automation Studio in Mbeya, Tanzania. Office address, business hours, phone number, and directions.',
+  alternates: { canonical: '/office-info' },
+  openGraph: { title: 'Office Info | ZamTech Mbeya Tanzania', description: 'ZamTech office address, hours, and contact details in Mbeya, Tanzania.', url: '/office-info' },
+}
 
 const schedule = [
   { day: 'Monday', open: '8:00 AM', close: '6:00 PM', status: 'open' },

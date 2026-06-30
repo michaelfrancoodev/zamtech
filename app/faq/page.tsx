@@ -1,9 +1,17 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { MessageCircle, ArrowRight } from 'lucide-react'
 import PageWrapper from '@/components/page-wrapper'
 import PageHero from '@/components/page-hero'
 import WhatsAppIcon from '@/components/whatsapp-icon'
+
+export const metadata: Metadata = {
+  title: 'Frequently Asked Questions',
+  description: 'Answers to common questions about ZamTech services, pricing, timelines, and support — everything you need to know before starting your project.',
+  alternates: { canonical: '/faq' },
+  openGraph: { title: 'FAQ | ZamTech Automation Studio', description: 'Common questions about our ICT services, pricing, and process.', url: '/faq' },
+}
 
 const WA = 'https://wa.me/255796985138'
 
