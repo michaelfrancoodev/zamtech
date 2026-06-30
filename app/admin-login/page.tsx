@@ -1,16 +1,24 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { signIn } from '@/lib/auth-client'
+import { signIn, useSession } from '@/lib/auth-client'
 import { Lock, Loader2, Eye, EyeOff } from 'lucide-react'
 
 export default function AdminLoginPage() {
   const router = useRouter()
+  const { data: session, isPending: sessionLoading } = useSession()
   const [isPending, startTransition] = useTransition()
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({ email: '', password: '' })
+
+  // If already logged in, skip the login page and go straight to dashboard
+  useEffect(() => {
+    if (!sessionLoading && session?.user) {
+      router.replace('/admin')
+    }
+  }, [session, sessionLoading, router])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -31,6 +39,15 @@ export default function AdminLoginPage() {
         router.refresh()
       }
     })
+  }
+
+  // Show nothing while checking session — avoids flash of login form for already-authed admins
+  if (sessionLoading || (!sessionLoading && session?.user)) {
+    return (
+      <div className="min-h-screen bg-navy flex items-center justify-center">
+        <Loader2 className="w-7 h-7 text-primary animate-spin" />
+      </div>
+    )
   }
 
   return (

@@ -238,9 +238,18 @@ export default function Footer() {
           <p className="text-white/25 text-xs text-center sm:text-left">
             &copy; {year} ZamTech Automation Studio. All rights reserved. &mdash; Mbeya, Tanzania.
           </p>
-          <p className="text-white/20 text-xs">
-            Built with care for Tanzanian businesses.
-          </p>
+          <div className="flex items-center gap-5">
+            <p className="text-white/20 text-xs">
+              Built with care for Tanzanian businesses.
+            </p>
+            <Link
+              href="/admin-login"
+              className="text-white/15 text-xs hover:text-white/40 transition-colors"
+              aria-label="Staff login"
+            >
+              Staff Login
+            </Link>
+          </div>
         </div>
       </div>
 
