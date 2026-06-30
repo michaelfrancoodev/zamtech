@@ -126,7 +126,7 @@ export default function FAQPage() {
               >
                 {cat.title}
               </h2>
-              <Accordion type="single" collapsible className="space-y-2">
+              <Accordion className="space-y-2">
                 {cat.faqs.map((faq, i) => (
                   <AccordionItem
                     key={i}

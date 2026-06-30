@@ -21,6 +21,7 @@ const COL_COMPANY = [
   { label: 'About Us',     href: '/about' },
   { label: 'Services',     href: '/services' },
   { label: 'Pricing',      href: '/pricing' },
+  { label: 'Blog',         href: '/blog' },
   { label: 'Careers',      href: '/careers' },
   { label: 'Testimonials', href: '/testimonials' },
   { label: 'Office Info',  href: '/office-info' },
@@ -28,6 +29,7 @@ const COL_COMPANY = [
 const COL_SUPPORT = [
   { label: 'Support Center',    href: '/support' },
   { label: 'FAQ',               href: '/faq' },
+  { label: 'Track My Request',  href: '/track' },
   { label: 'Request a Service', href: '/request-service' },
   { label: 'Contact Us',        href: '/contact' },
 ]

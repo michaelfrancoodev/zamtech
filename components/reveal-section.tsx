@@ -48,8 +48,8 @@ export default function RevealSection({ children, className = '', as: Tag = 'sec
   }, [])
 
   return (
-    // @ts-expect-error — dynamic tag type
-    <Tag ref={ref} className={className}>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    <Tag ref={ref as any} className={className}>
       {children}
     </Tag>
   )

@@ -1,5 +1,13 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import PageWrapper from '@/components/page-wrapper'
+
+export const metadata: Metadata = {
+  title: 'Cookie Policy',
+  description: 'ZamTech Automation Studio cookie policy — what cookies we use, why we use them, and how to manage them.',
+  alternates: { canonical: '/cookies' },
+  robots: { index: true, follow: false },
+}
 
 const cookieTypes = [
   {
