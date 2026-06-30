@@ -67,6 +67,7 @@ export async function submitContactMessage(data: {
     message: data.message,
     status: 'unread',
   })
+  // sendContactEmail internally sends both admin notification AND client acknowledgement
   sendContactEmail(data).catch(() => {})
   revalidatePath('/admin')
 }
